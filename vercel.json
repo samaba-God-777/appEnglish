@@ -1,0 +1,17 @@
+{
+  "buildCommand": "tsc -b && vite build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "functions": {
+    "api/review.ts": { "maxDuration": 60 },
+    "api/grammar.ts": { "maxDuration": 30 },
+    "api/pronunciation.ts": { "maxDuration": 30 },
+    "api/speaking.ts": { "maxDuration": 30 },
+    "api/games.ts": { "maxDuration": 30 }
+  }
+}

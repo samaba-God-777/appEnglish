@@ -47,6 +47,11 @@ function initialsFrom(name: string): string {
     .join("");
 }
 
+const TEACHER_ALLOWED_EMAILS = [
+  "degraciawilliams10@gmail.com",
+  "yoditamvale@gmail.com",
+];
+
 function freshProfile(email: string, name?: string, role: UserRole = "student"): UserProfile {
   const displayName = name?.trim() || email.split("@")[0] || "Learner";
   return {
@@ -85,7 +90,10 @@ export const useAuthStore = create<AuthState>()(
         if (session?.user) {
           const email = session.user.email ?? "";
           const name = session.user.user_metadata?.full_name ?? session.user.user_metadata?.name ?? email.split("@")[0];
-          const role = (session.user.user_metadata?.role as UserRole) ?? "student";
+          let role = (session.user.user_metadata?.role as UserRole) ?? "student";
+          if (role === "teacher" && !TEACHER_ALLOWED_EMAILS.includes(email.toLowerCase())) {
+            role = "student";
+          }
           set({ isAuthenticated: true, user: freshProfile(email, name, role) });
         } else {
           set({ user: null, isAuthenticated: false });

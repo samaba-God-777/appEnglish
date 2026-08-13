@@ -19,6 +19,11 @@ const signupSchema = z.object({
 
 type SignupForm = z.infer<typeof signupSchema>;
 
+const TEACHER_ALLOWED_EMAILS = [
+  "degraciawilliams10@gmail.com",
+  "yoditamvale@gmail.com",
+];
+
 export default function SignUpPage() {
   const login = useAuthStore((s) => s.login);
   const navigate = useNavigate();
@@ -34,6 +39,10 @@ export default function SignUpPage() {
 
   const onSubmit = async (data: SignupForm) => {
     setAuthError(null);
+    if (selectedRole === "teacher" && !TEACHER_ALLOWED_EMAILS.includes(data.email.toLowerCase())) {
+      setAuthError("Only authorized teachers can create teacher accounts. Contact admin for access.");
+      return;
+    }
     const { data: result, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -128,6 +137,11 @@ export default function SignUpPage() {
               <span className="text-xs text-center">I want to teach English</span>
             </button>
           </div>
+          {selectedRole === "teacher" && (
+            <p className="mt-2 text-xs text-muted-foreground text-center">
+              Only authorized teacher accounts are allowed.
+            </p>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
             <div>

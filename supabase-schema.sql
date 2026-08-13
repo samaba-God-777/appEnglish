@@ -32,14 +32,21 @@ CREATE TABLE IF NOT EXISTS profiles (
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+  requested_role TEXT;
+  allowed_emails TEXT[] := ARRAY['degraciawilliams10@gmail.com', 'yoditamvale@gmail.com'];
 BEGIN
+  requested_role := COALESCE(NEW.raw_user_meta_data->>'role', 'student');
+  IF requested_role = 'teacher' AND NOT (LOWER(COALESCE(NEW.email, '')) = ANY(allowed_emails)) THEN
+    requested_role := 'student';
+  END IF;
   INSERT INTO public.profiles (id, full_name, email, avatar_initials, role)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
     COALESCE(NEW.email, ''),
     UPPER(SUBSTRING(COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email, ''), 1, 2)),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'student')
+    requested_role
   );
   RETURN NEW;
 END;

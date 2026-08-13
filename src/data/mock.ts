@@ -17,6 +17,7 @@ export const currentUser: UserProfile = {
   name: "Degracia Williams",
   email: "degraciawilliams10@gmail.com",
   avatarInitials: "DW",
+  role: "student",
   level: "B1",
   xp: 12480,
   xpToNextLevel: 15000,

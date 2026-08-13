@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   KeyRound,
@@ -22,7 +21,6 @@ interface EnrolledClass {
 }
 
 export default function StudentJoinPage() {
-  const navigate = useNavigate();
   const [code, setCode] = useState("");
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);

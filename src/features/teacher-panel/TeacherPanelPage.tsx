@@ -8,13 +8,11 @@ import {
   Users,
   BookOpen,
   Trophy,
-  Clock,
   ChevronDown,
   ChevronUp,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/auth";
 import {
   createClass,
   fetchTeacherClasses,
@@ -24,7 +22,6 @@ import {
 import type { TeacherClass, StudentWithScores } from "@/types";
 
 export default function TeacherPanelPage() {
-  const user = useAuthStore((s) => s.user);
   const [classes, setClasses] = useState<TeacherClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -205,7 +202,7 @@ export default function TeacherPanelPage() {
                     Students
                     {students[cls.id] && (
                       <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
-                        {students[cls.id].length}
+                        {students[cls.id]?.length}
                       </span>
                     )}
                   </span>
@@ -229,7 +226,7 @@ export default function TeacherPanelPage() {
                         <div className="flex items-center justify-center py-8">
                           <Loader2 className="size-5 animate-spin text-muted-foreground" />
                         </div>
-                      ) : !students[cls.id] || students[cls.id].length === 0 ? (
+                      ) : !students[cls.id] || students[cls.id]?.length === 0 ? (
                         <div className="px-5 py-8 text-center text-sm text-muted-foreground">
                           No students enrolled yet. Share the code with your students.
                         </div>
@@ -248,7 +245,7 @@ export default function TeacherPanelPage() {
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
-                              {students[cls.id].map((student) => (
+                              {students[cls.id]?.map((student) => (
                                 <tr key={student.studentId} className="hover:bg-muted/30 transition-colors">
                                   <td className="px-5 py-3">
                                     <div className="flex items-center gap-3">

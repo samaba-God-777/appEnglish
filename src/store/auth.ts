@@ -2,19 +2,20 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CefrLevel, UserProfile } from "@/types";
 import { currentUser } from "@/data/mock";
+import { supabase } from "@/lib/supabase";
 
 interface AuthState {
   user: UserProfile | null;
   isAuthenticated: boolean;
   login: (email: string, name?: string) => void;
   logout: () => void;
+  syncSession: () => Promise<void>;
   updateProfile: (patch: Partial<Pick<UserProfile, "name" | "avatarInitials" | "level">>) => void;
   addXp: (amount: number) => void;
   addCoins: (amount: number) => void;
   addDiamonds: (amount: number) => void;
 }
 
-/** Cumulative XP needed to finish each level and move to the next. */
 const levelThresholds: Array<{ level: CefrLevel; nextAt: number }> = [
   { level: "A1", nextAt: 1000 },
   { level: "A2", nextAt: 2500 },
@@ -46,7 +47,6 @@ function initialsFrom(name: string): string {
     .join("");
 }
 
-/** A brand-new learner: everything starts at zero. */
 function freshProfile(email: string, name?: string): UserProfile {
   const displayName = name?.trim() || email.split("@")[0] || "Learner";
   return {
@@ -75,7 +75,20 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       login: (email, name) => set({ isAuthenticated: true, user: freshProfile(email, name) }),
-      logout: () => set({ user: null, isAuthenticated: false }),
+      logout: async () => {
+        await supabase.auth.signOut();
+        set({ user: null, isAuthenticated: false });
+      },
+      syncSession: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const email = session.user.email ?? "";
+          const name = session.user.user_metadata?.full_name ?? session.user.user_metadata?.name ?? email.split("@")[0];
+          set({ isAuthenticated: true, user: freshProfile(email, name) });
+        } else {
+          set({ user: null, isAuthenticated: false });
+        }
+      },
       updateProfile: (patch) =>
         set((state) => (state.user ? { user: { ...state.user, ...patch } } : state)),
       addXp: (amount) =>
@@ -92,8 +105,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "englishai-auth",
-      version: 1,
-      // v0 sessions carried demo stats; v1 restarts the profile at zero, keeping identity.
+      version: 2,
       migrate: (persisted) => {
         const old = persisted as { user?: { email?: string; name?: string } | null; isAuthenticated?: boolean };
         if (old?.isAuthenticated && old.user?.email) {
@@ -105,7 +117,6 @@ export const useAuthStore = create<AuthState>()(
   ),
 );
 
-/** Returns the authenticated user, falling back to the demo profile (routes are guarded anyway). */
 export function useUser(): UserProfile {
   return useAuthStore((s) => s.user) ?? currentUser;
 }

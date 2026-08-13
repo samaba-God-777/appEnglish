@@ -5,6 +5,7 @@ import { RequireAuth } from "@/features/auth/RequireAuth";
 import { PageSkeleton } from "@/components/ui/skeleton";
 
 const LoginPage = lazy(() => import("@/features/auth/LoginPage"));
+const SignUpPage = lazy(() => import("@/features/auth/SignUpPage"));
 const DashboardPage = lazy(() => import("@/features/dashboard/DashboardPage"));
 const CoursesPage = lazy(() => import("@/features/courses/CoursesPage"));
 const CourseDetailPage = lazy(() => import("@/features/courses/CourseDetailPage"));
@@ -33,6 +34,14 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<PageSkeleton />}>
         <LoginPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/signup",
+    element: (
+      <Suspense fallback={<PageSkeleton />}>
+        <SignUpPage />
       </Suspense>
     ),
   },

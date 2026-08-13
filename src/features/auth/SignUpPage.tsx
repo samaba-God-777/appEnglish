@@ -1,32 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { GraduationCap, Eye, EyeOff, Loader2, Sparkles, Mic, Trophy } from "lucide-react";
+import { GraduationCap, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/cn";
 
-const loginSchema = z.object({
+const signupSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   email: z.string().min(1, "Email is required").email("Enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-type LoginForm = z.infer<typeof loginSchema>;
+type SignupForm = z.infer<typeof signupSchema>;
 
-const highlights = [
-  { icon: Sparkles, text: "AI tutor that adapts to your CEFR level" },
-  { icon: Mic, text: "Real-time pronunciation analysis" },
-  { icon: Trophy, text: "Gamified streaks, XP and leagues" },
-];
-
-export default function LoginPage() {
+export default function SignUpPage() {
   const login = useAuthStore((s) => s.login);
   const navigate = useNavigate();
-  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -34,29 +28,22 @@ export default function LoginPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
+  } = useForm<SignupForm>({ resolver: zodResolver(signupSchema) });
 
-  const from = (location.state as { from?: string } | null)?.from ?? "/";
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate(from, { replace: true });
-    });
-  }, [navigate, from]);
-
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: SignupForm) => {
     setAuthError(null);
-    const { data: result, error } = await supabase.auth.signInWithPassword({
+    const { data: result, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
+      options: { data: { full_name: data.name } },
     });
     if (error) {
-      setAuthError(error.message === "Invalid login credentials" ? "Email or password incorrect" : error.message);
+      setAuthError(error.message === "User already registered" ? "An account with this email already exists" : error.message);
       return;
     }
     if (result.user) {
-      login(result.user.email ?? data.email, result.user.user_metadata?.full_name);
-      navigate(from, { replace: true });
+      login(result.user.email ?? data.email, data.name);
+      navigate("/", { replace: true });
     }
   };
 
@@ -71,42 +58,18 @@ export default function LoginPage() {
           }}
           aria-hidden
         />
-        <div className="relative flex h-full flex-col justify-between p-12 text-primary-foreground">
-          <div className="flex items-center gap-3">
-            <div className="flex size-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
-              <GraduationCap className="size-6" aria-hidden />
-            </div>
-            <span className="text-lg font-extrabold tracking-tight">EnglishAI Pro</span>
-          </div>
-
-          <div>
-            <motion.h1
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4 }}
-              className="max-w-md text-4xl leading-tight font-extrabold tracking-tight"
-            >
-              Learn English smarter with artificial intelligence.
-            </motion.h1>
-            <ul className="mt-8 space-y-4">
-              {highlights.map(({ icon: Icon, text }, i) => (
-                <motion.li
-                  key={text}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.15 + i * 0.1 }}
-                  className="flex items-center gap-3 text-sm font-medium text-white/90"
-                >
-                  <span className="flex size-8 items-center justify-center rounded-lg bg-white/15">
-                    <Icon className="size-4" aria-hidden />
-                  </span>
-                  {text}
-                </motion.li>
-              ))}
-            </ul>
-          </div>
-
-          <p className="text-xs text-white/70">Trusted by schools, academies and companies worldwide.</p>
+        <div className="relative flex h-full flex-col justify-center p-12 text-primary-foreground">
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="max-w-md text-4xl leading-tight font-extrabold tracking-tight"
+          >
+            Start your journey from A1 to C1 today.
+          </motion.h1>
+          <p className="mt-6 text-sm text-white/80">
+            Join thousands of learners improving their English with AI-powered lessons, real-time feedback, and gamified progress.
+          </p>
         </div>
       </div>
 
@@ -124,8 +87,8 @@ export default function LoginPage() {
             <span className="text-lg font-extrabold tracking-tight">EnglishAI Pro</span>
           </div>
 
-          <h2 className="text-2xl font-extrabold tracking-tight">Welcome back</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in to continue your learning streak.</p>
+          <h2 className="text-2xl font-extrabold tracking-tight">Create your account</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Start your journey from A1 to C1 today.</p>
 
           {authError && (
             <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -134,6 +97,25 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4" noValidate>
+            <div>
+              <label htmlFor="name" className="mb-1.5 block text-sm font-semibold">
+                Full name
+              </label>
+              <input
+                id="name"
+                type="text"
+                autoComplete="name"
+                placeholder="Your full name"
+                aria-invalid={!!errors.name}
+                className={cn(
+                  "h-11 w-full rounded-xl border border-border bg-card px-4 text-sm placeholder:text-muted-foreground focus:border-ring",
+                  errors.name && "border-destructive",
+                )}
+                {...register("name")}
+              />
+              {errors.name && <p className="mt-1 text-xs font-medium text-destructive">{errors.name.message}</p>}
+            </div>
+
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm font-semibold">
                 Email
@@ -161,7 +143,7 @@ export default function LoginPage() {
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   placeholder="••••••••"
                   aria-invalid={!!errors.password}
                   className={cn(
@@ -186,14 +168,14 @@ export default function LoginPage() {
 
             <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
-              Sign in
+              Create account
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            New to EnglishAI Pro?{" "}
-            <Link to="/signup" className="font-semibold text-primary hover:underline">
-              Create an account
+            Already have an account?{" "}
+            <Link to="/login" className="font-semibold text-primary hover:underline">
+              Sign in
             </Link>
           </p>
         </motion.div>

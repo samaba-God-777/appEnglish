@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f8fafb;
+  --foreground: #0f2e2b;
+  --card: #ffffff;
+  --card-foreground: #0f2e2b;
+  --popover: #ffffff;
+  --popover-foreground: #0f2e2b;
+  --primary: #0d9488;
+  --primary-foreground: #ffffff;
+  --secondary: #eef6f5;
+  --secondary-foreground: #134e4a;
+  --muted: #f0f4f5;
+  --muted-foreground: #5c7572;
+  --accent: #d97706;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+  --border: #e4ebea;
+  --input: #e4ebea;
+  --ring: #0d9488;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #3f5754;
+  --chart-1: #0d9488;
+  --chart-2: #2dd4bf;
+  --chart-3: #d97706;
+  --chart-4: #6366f1;
+  --chart-5: #f43f5e;
+}
+
+.dark {
+  --background: #0a1514;
+  --foreground: #e6f0ef;
+  --card: #101f1d;
+  --card-foreground: #e6f0ef;
+  --popover: #132422;
+  --popover-foreground: #e6f0ef;
+  --primary: #2dd4bf;
+  --primary-foreground: #042f2c;
+  --secondary: #16302d;
+  --secondary-foreground: #c8e5e2;
+  --muted: #14211f;
+  --muted-foreground: #8aa3a0;
+  --accent: #f59e0b;
+  --accent-foreground: #291500;
+  --destructive: #f87171;
+  --destructive-foreground: #300;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --border: #1d3230;
+  --input: #24403d;
+  --ring: #2dd4bf;
+  --sidebar: #0d1a19;
+  --sidebar-foreground: #9fb8b5;
+  --chart-1: #2dd4bf;
+  --chart-2: #5eead4;
+  --chart-3: #fbbf24;
+  --chart-4: #818cf8;
+  --chart-5: #fb7185;
+}
+
+@theme inline {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
+  --shadow-soft: 0 1px 2px rgb(16 42 40 / 0.04), 0 4px 16px rgb(16 42 40 / 0.06);
+  --shadow-lifted: 0 2px 4px rgb(16 42 40 / 0.05), 0 12px 32px rgb(16 42 40 / 0.1);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .glass {
+    background-color: color-mix(in srgb, var(--color-card) 72%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+}

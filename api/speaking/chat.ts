@@ -31,8 +31,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const { topic, level, messages } = req.body as { topic?: string; level?: string; messages?: ChatTurn[] };
-    const chatMessages = (messages ?? []).filter((m): m is ChatTurn => m.role === "user" || m.role === "assistant");
-    if (chatMessages.length === 0) return res.status(400).json({ error: "Empty messages" });
+    const chatMessages = (messages ?? []).filter((m): m is ChatTurn => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim().length > 0);
+
+    const systemMsg = { role: "system" as const, content: conversationSystem(topic ?? "", level ?? "B1") };
+
+    let apiMessages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
+    if (chatMessages.length === 0) {
+      apiMessages = [systemMsg, { role: "user", content: `Let's start a conversation about ${topic || "something you enjoy"}. Say hello and ask me a question.` }];
+    } else {
+      apiMessages = [systemMsg, ...chatMessages];
+    }
 
     const chatRes = await fetch(GROQ_CHAT_URL, {
       method: "POST",
@@ -41,7 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model: CHAT_MODEL,
         temperature: 0.8,
         max_tokens: 300,
-        messages: [{ role: "system", content: conversationSystem(topic ?? "", level ?? "B1") }, ...chatMessages],
+        messages: apiMessages,
       }),
     });
     if (!chatRes.ok) {

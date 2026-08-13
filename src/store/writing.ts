@@ -2,14 +2,14 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { WritingReview } from "@/features/writing/review-types";
 import type { WritingLevel } from "@/features/writing/prompts";
+import { insertWritingEssay } from "@/lib/db";
 
 export interface EssayRecord {
   id: string;
-  date: string; // ISO
+  date: string;
   promptId: string;
   promptText: string;
   level: WritingLevel;
-  /** Essay type id (e.g. "narrative"); legacy records may hold old genre ids. */
   genre: string;
   text: string;
   review: WritingReview;
@@ -35,7 +35,28 @@ export const useWritingStore = create<WritingState>()(
       draft: null,
       saveDraft: (draft) => set({ draft }),
       clearDraft: () => set({ draft: null }),
-      addEssay: (essay) => set((state) => ({ essays: [essay, ...state.essays] })),
+      addEssay: (essay) =>
+        set((state) => {
+          // Sync to Supabase (fire-and-forget)
+          insertWritingEssay({
+            essay_id: essay.id,
+            prompt_id: essay.promptId,
+            prompt_text: essay.promptText,
+            level: essay.level,
+            genre: essay.genre,
+            text: essay.text,
+            overall_score: essay.review.scores.overall,
+            grammar_score: essay.review.scores.grammar,
+            vocabulary_score: essay.review.scores.vocabulary,
+            coherence_score: essay.review.scores.coherence,
+            task_response_score: essay.review.scores.taskResponse,
+            corrections: essay.review.corrections,
+            feedback: essay.review.feedback,
+            improved_version: essay.review.improvedVersion,
+            vocabulary_suggestions: essay.review.vocabularySuggestions,
+          });
+          return { essays: [essay, ...state.essays] };
+        }),
     }),
     { name: "englishai-writing" },
   ),
@@ -47,7 +68,6 @@ export interface ScorePoint {
   score: number;
 }
 
-/** Oldest-first score history for the progress chart. */
 export function scoreHistory(essays: EssayRecord[]): ScorePoint[] {
   return [...essays]
     .reverse()
@@ -65,7 +85,6 @@ export interface RepeatedError {
   count: number;
 }
 
-/** Mistakes the student has made in more than one essay — the highest-value feedback. */
 export function repeatedErrors(essays: EssayRecord[], min = 2): RepeatedError[] {
   const byKey = new Map<string, RepeatedError>();
   for (const essay of essays) {

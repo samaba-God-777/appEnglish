@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { courses } from "@/data/mock";
+import { upsertCourseProgress } from "@/lib/db";
 
 interface ProgressState {
-  /** Completed lesson count per course id. Every course starts at zero. */
   completedByCourse: Record<string, number>;
   completeLesson: (courseId: string) => void;
   resetCourse: (courseId: string) => void;
@@ -20,11 +20,11 @@ export const useProgressStore = create<ProgressState>()(
           const course = courses.find((c) => c.id === courseId);
           if (!course) return state;
           const current = state.completedByCourse[courseId] ?? 0;
+          const next = Math.min(course.lessons, current + 1);
+          // Sync to Supabase (fire-and-forget)
+          upsertCourseProgress(courseId, next, course.lessons);
           return {
-            completedByCourse: {
-              ...state.completedByCourse,
-              [courseId]: Math.min(course.lessons, current + 1),
-            },
+            completedByCourse: { ...state.completedByCourse, [courseId]: next },
           };
         }),
       resetCourse: (courseId) =>
@@ -35,7 +35,6 @@ export const useProgressStore = create<ProgressState>()(
     {
       name: "englishai-progress",
       version: 1,
-      // v0 seeded demo progress from mock data; v1 starts every course at zero.
       migrate: () => ({ completedByCourse: { ...freshStart } }),
     },
   ),

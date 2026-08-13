@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { SkillKey } from "@/types";
+import { upsertDailyActivity, upsertSkillXp } from "@/lib/db";
 
 interface DayActivity {
   xp: number;
@@ -8,7 +9,6 @@ interface DayActivity {
 }
 
 interface StatsState {
-  /** Activity keyed by local date (YYYY-MM-DD). Everything starts empty. */
   byDate: Record<string, DayActivity>;
   skillXp: Record<SkillKey, number>;
   pronunciationScore: number;
@@ -42,6 +42,9 @@ export const useStatsStore = create<StatsState>()(
         set((state) => {
           const key = dateKey();
           const day = state.byDate[key] ?? { xp: 0, minutes: 0 };
+          // Sync to Supabase (fire-and-forget)
+          upsertDailyActivity(xp, minutes);
+          if (skill) upsertSkillXp(skill, state.skillXp[skill] + xp);
           return {
             byDate: { ...state.byDate, [key]: { xp: day.xp + xp, minutes: day.minutes + minutes } },
             skillXp: skill ? { ...state.skillXp, [skill]: state.skillXp[skill] + xp } : state.skillXp,
@@ -53,7 +56,6 @@ export const useStatsStore = create<StatsState>()(
   ),
 );
 
-/** Consecutive days with activity, counting back from today (or yesterday if today is idle so far). */
 export function computeStreak(byDate: Record<string, DayActivity>): number {
   let streak = 0;
   const cursor = new Date();
@@ -91,7 +93,6 @@ export function lastNDays(byDate: Record<string, DayActivity>, n: number): DayPo
   return points;
 }
 
-/** Heatmap intensity 0–4 from XP earned that day. */
 export function heatmapLevelForXp(xp: number): number {
   if (xp <= 0) return 0;
   if (xp < 30) return 1;
@@ -100,7 +101,6 @@ export function heatmapLevelForXp(xp: number): number {
   return 4;
 }
 
-/** Radar score 0–100: every 5 XP in a skill is one point. */
 export function skillScore(xp: number): number {
   return Math.min(100, Math.round(xp / 5));
 }

@@ -14,6 +14,8 @@ import {
   Medal,
   Award,
   Settings,
+  Users,
+  KeyRound,
   type LucideIcon,
 } from "lucide-react";
 
@@ -62,6 +64,13 @@ export const navSections: NavSection[] = [
       { label: "Leaderboard", path: "/leaderboard", icon: Trophy },
       { label: "Achievements", path: "/achievements", icon: Medal },
       { label: "Certificates", path: "/certificates", icon: Award },
+    ],
+  },
+  {
+    title: "Classroom",
+    items: [
+      { label: "Teacher Panel", path: "/teacher-panel", icon: Users },
+      { label: "Join Class", path: "/join-class", icon: KeyRound },
     ],
   },
   {

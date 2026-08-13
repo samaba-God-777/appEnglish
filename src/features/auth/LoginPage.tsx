@@ -55,7 +55,8 @@ export default function LoginPage() {
       return;
     }
     if (result.user) {
-      login(result.user.email ?? data.email, result.user.user_metadata?.full_name);
+      const role = (result.user.user_metadata?.role as "student" | "teacher") ?? "student";
+      login(result.user.email ?? data.email, result.user.user_metadata?.full_name, role);
       navigate(from, { replace: true });
     }
   };

@@ -1,16 +1,16 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { CefrLevel, UserProfile } from "@/types";
+import type { CefrLevel, UserProfile, UserRole } from "@/types";
 import { currentUser } from "@/data/mock";
 import { supabase } from "@/lib/supabase";
 
 interface AuthState {
   user: UserProfile | null;
   isAuthenticated: boolean;
-  login: (email: string, name?: string) => void;
+  login: (email: string, name?: string, role?: UserRole) => void;
   logout: () => void;
   syncSession: () => Promise<void>;
-  updateProfile: (patch: Partial<Pick<UserProfile, "name" | "avatarInitials" | "level">>) => void;
+  updateProfile: (patch: Partial<Pick<UserProfile, "name" | "avatarInitials" | "level" | "role">>) => void;
   addXp: (amount: number) => void;
   addCoins: (amount: number) => void;
   addDiamonds: (amount: number) => void;
@@ -47,13 +47,14 @@ function initialsFrom(name: string): string {
     .join("");
 }
 
-function freshProfile(email: string, name?: string): UserProfile {
+function freshProfile(email: string, name?: string, role: UserRole = "student"): UserProfile {
   const displayName = name?.trim() || email.split("@")[0] || "Learner";
   return {
     id: "u-local",
     name: displayName,
     email,
     avatarInitials: initialsFrom(displayName),
+    role,
     level: "A1",
     xp: 0,
     xpToNextLevel: 1000,
@@ -74,7 +75,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      login: (email, name) => set({ isAuthenticated: true, user: freshProfile(email, name) }),
+      login: (email, name, role) => set({ isAuthenticated: true, user: freshProfile(email, name, role) }),
       logout: async () => {
         await supabase.auth.signOut();
         set({ user: null, isAuthenticated: false });
@@ -84,7 +85,8 @@ export const useAuthStore = create<AuthState>()(
         if (session?.user) {
           const email = session.user.email ?? "";
           const name = session.user.user_metadata?.full_name ?? session.user.user_metadata?.name ?? email.split("@")[0];
-          set({ isAuthenticated: true, user: freshProfile(email, name) });
+          const role = (session.user.user_metadata?.role as UserRole) ?? "student";
+          set({ isAuthenticated: true, user: freshProfile(email, name, role) });
         } else {
           set({ user: null, isAuthenticated: false });
         }

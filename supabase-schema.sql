@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   full_name TEXT,
   email TEXT,
   avatar_initials TEXT,
+  role TEXT DEFAULT 'student' CHECK (role IN ('student', 'teacher')),
   level TEXT DEFAULT 'A1',
   xp INTEGER DEFAULT 0,
   xp_to_next_level INTEGER DEFAULT 1000,
@@ -32,12 +33,13 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, email, avatar_initials)
+  INSERT INTO public.profiles (id, full_name, email, avatar_initials, role)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
     COALESCE(NEW.email, ''),
-    UPPER(SUBSTRING(COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email, ''), 1, 2))
+    UPPER(SUBSTRING(COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email, ''), 1, 2)),
+    COALESCE(NEW.raw_user_meta_data->>'role', 'student')
   );
   RETURN NEW;
 END;
@@ -268,6 +270,28 @@ CREATE TABLE IF NOT EXISTS user_settings (
   UNIQUE(user_id)
 );
 
+-- 17. CLASSES (teacher-created classrooms)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS classes (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  teacher_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  class_name TEXT NOT NULL,
+  class_code TEXT NOT NULL UNIQUE,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 18. ENROLLMENTS (students joining classes)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS enrollments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(class_id, student_id)
+);
+
 -- ============================================================
 -- INDEXES for performance
 -- ============================================================
@@ -277,6 +301,10 @@ CREATE INDEX IF NOT EXISTS idx_speaking_sessions_user ON speaking_sessions(user_
 CREATE INDEX IF NOT EXISTS idx_writing_essays_user ON writing_essays(user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_game_sessions_user ON game_sessions(user_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_ai_tutor_chats_user ON ai_tutor_chats(user_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_classes_teacher ON classes(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_classes_code ON classes(class_code);
+CREATE INDEX IF NOT EXISTS idx_enrollments_class ON enrollments(class_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_student ON enrollments(student_id);
 
 -- ============================================================
 -- ROW LEVEL SECURITY (RLS) - Users can only see their own data
@@ -297,6 +325,8 @@ ALTER TABLE game_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_certificates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies: each user can only CRUD their own rows
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
@@ -356,6 +386,26 @@ CREATE POLICY "Users can insert own user_certificates" ON user_certificates FOR 
 CREATE POLICY "Users can view own user_settings" ON user_settings FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own user_settings" ON user_settings FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own user_settings" ON user_settings FOR UPDATE USING (auth.uid() = user_id);
+
+-- Classes: teachers can manage their own classes, students can view classes they're enrolled in
+CREATE POLICY "Teachers can view own classes" ON classes FOR SELECT USING (auth.uid() = teacher_id);
+CREATE POLICY "Teachers can insert own classes" ON classes FOR INSERT WITH CHECK (auth.uid() = teacher_id);
+CREATE POLICY "Teachers can update own classes" ON classes FOR UPDATE USING (auth.uid() = teacher_id);
+CREATE POLICY "Teachers can delete own classes" ON classes FOR DELETE USING (auth.uid() = teacher_id);
+CREATE POLICY "Students can view enrolled classes" ON classes FOR SELECT USING (
+  EXISTS (SELECT 1 FROM enrollments WHERE enrollments.class_id = classes.id AND enrollments.student_id = auth.uid())
+);
+CREATE POLICY "Anyone can lookup class by code" ON classes FOR SELECT USING (true);
+
+-- Enrollments: teachers can view enrollments in their classes, students can view their own enrollments
+CREATE POLICY "Teachers can view enrollments in own classes" ON enrollments FOR SELECT USING (
+  EXISTS (SELECT 1 FROM classes WHERE classes.id = enrollments.class_id AND classes.teacher_id = auth.uid())
+);
+CREATE POLICY "Students can view own enrollments" ON enrollments FOR SELECT USING (auth.uid() = student_id);
+CREATE POLICY "Students can insert own enrollments" ON enrollments FOR INSERT WITH CHECK (auth.uid() = student_id);
+CREATE POLICY "Teachers can delete enrollments from own classes" ON enrollments FOR DELETE USING (
+  EXISTS (SELECT 1 FROM classes WHERE classes.id = enrollments.class_id AND classes.teacher_id = auth.uid())
+);
 
 -- ============================================================
 -- HELPER: upsert daily activity (avoids duplicates)

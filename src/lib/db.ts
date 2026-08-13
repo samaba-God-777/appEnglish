@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { SkillKey } from "@/types";
+import type { SkillKey, TeacherClass, StudentWithScores } from "@/types";
 
 async function getUserId(): Promise<string | null> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -359,4 +359,166 @@ export async function upsertUserSettings(settings: {
 export async function fetchUserSettings(userId: string) {
   const { data } = await supabase.from("user_settings").select("*").eq("user_id", userId).single();
   return data;
+}
+
+// ── Classes (Teacher) ─────────────────────────────────────────
+
+function generateClassCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+export async function createClass(className: string, description?: string) {
+  const uid = await getUserId();
+  if (!uid) return null;
+  const classCode = generateClassCode();
+  const { data, error } = await supabase
+    .from("classes")
+    .insert({ teacher_id: uid, class_name: className, class_code: classCode, description })
+    .select()
+    .single();
+  if (error) return null;
+  return {
+    id: data.id,
+    teacherId: data.teacher_id,
+    className: data.class_name,
+    classCode: data.class_code,
+    description: data.description,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  } as TeacherClass;
+}
+
+export async function fetchTeacherClasses() {
+  const uid = await getUserId();
+  if (!uid) return [];
+  const { data } = await supabase
+    .from("classes")
+    .select("*")
+    .eq("teacher_id", uid)
+    .order("created_at", { ascending: false });
+  if (!data) return [];
+  return data.map((row) => ({
+    id: row.id,
+    teacherId: row.teacher_id,
+    className: row.class_name,
+    classCode: row.class_code,
+    description: row.description,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  })) as TeacherClass[];
+}
+
+export async function deleteClass(classId: string) {
+  await supabase.from("classes").delete().eq("id", classId);
+}
+
+export async function fetchClassByCode(code: string) {
+  const { data } = await supabase
+    .from("classes")
+    .select("*")
+    .eq("class_code", code.toUpperCase())
+    .single();
+  if (!data) return null;
+  return {
+    id: data.id,
+    teacherId: data.teacher_id,
+    className: data.class_name,
+    classCode: data.class_code,
+    description: data.description,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  } as TeacherClass;
+}
+
+// ── Enrollments (Student joins class) ─────────────────────────
+
+export async function joinClass(classCode: string) {
+  const uid = await getUserId();
+  if (!uid) return { error: "Not authenticated" };
+  const cls = await fetchClassByCode(classCode);
+  if (!cls) return { error: "Class not found. Check the code and try again." };
+  const { error } = await supabase
+    .from("enrollments")
+    .insert({ class_id: cls.id, student_id: uid });
+  if (error) {
+    if (error.code === "23505") return { error: "You are already enrolled in this class." };
+    return { error: "Failed to join class." };
+  }
+  return { class: cls };
+}
+
+export async function fetchStudentEnrollments() {
+  const uid = await getUserId();
+  if (!uid) return [];
+  const { data } = await supabase
+    .from("enrollments")
+    .select("*, classes(*)")
+    .eq("student_id", uid)
+    .order("joined_at", { ascending: false });
+  if (!data) return [];
+  return data.map((row) => ({
+    id: row.id,
+    classId: row.class_id,
+    studentId: row.student_id,
+    joinedAt: row.joined_at,
+    class: row.classes
+      ? {
+          id: row.classes.id,
+          teacherId: row.classes.teacher_id,
+          className: row.classes.class_name,
+          classCode: row.classes.class_code,
+          description: row.classes.description,
+          createdAt: row.classes.created_at,
+          updatedAt: row.classes.updated_at,
+        }
+      : null,
+  }));
+}
+
+export async function fetchClassStudents(classId: string): Promise<StudentWithScores[]> {
+  const { data: enrollments } = await supabase
+    .from("enrollments")
+    .select("student_id, joined_at")
+    .eq("class_id", classId);
+  if (!enrollments || enrollments.length === 0) return [];
+
+  const studentIds = enrollments.map((e) => e.student_id);
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, full_name, email, avatar_initials, level, xp, words_learned, minutes_studied_today, streak_days")
+    .in("id", studentIds);
+  if (!profiles) return [];
+
+  const profileMap = new Map(profiles.map((p) => [p.id, p]));
+  return enrollments
+    .map((enrollment) => {
+      const profile = profileMap.get(enrollment.student_id);
+      if (!profile) return null;
+      return {
+        studentId: profile.id,
+        studentName: profile.full_name || "Unknown",
+        studentEmail: profile.email || "",
+        avatarInitials: profile.avatar_initials || "??",
+        xp: profile.xp || 0,
+        level: profile.level || "A1",
+        wordsLearned: profile.words_learned || 0,
+        minutesStudied: profile.minutes_studied_today || 0,
+        streakDays: profile.streak_days || 0,
+        joinedAt: enrollment.joined_at,
+      } as StudentWithScores;
+    })
+    .filter(Boolean) as StudentWithScores[];
+}
+
+export async function removeStudentFromClass(classId: string, studentId: string) {
+  await supabase
+    .from("enrollments")
+    .delete()
+    .eq("class_id", classId)
+    .eq("student_id", studentId);
 }

@@ -27,6 +27,8 @@ const LeaderboardPage = lazy(() => import("@/features/leaderboard/LeaderboardPag
 const AchievementsPage = lazy(() => import("@/features/achievements/AchievementsPage"));
 const CertificatesPage = lazy(() => import("@/features/certificates/CertificatesPage"));
 const SettingsPage = lazy(() => import("@/features/settings/SettingsPage"));
+const TeacherPanelPage = lazy(() => import("@/features/teacher-panel/TeacherPanelPage"));
+const StudentJoinPage = lazy(() => import("@/features/student-join/StudentJoinPage"));
 
 export const router = createBrowserRouter([
   {
@@ -103,6 +105,8 @@ export const router = createBrowserRouter([
       { path: "/achievements", element: <AchievementsPage /> },
       { path: "/certificates", element: <CertificatesPage /> },
       { path: "/settings", element: <SettingsPage /> },
+      { path: "/teacher-panel", element: <TeacherPanelPage /> },
+      { path: "/join-class", element: <StudentJoinPage /> },
     ],
   },
 ]);

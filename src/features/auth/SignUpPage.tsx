@@ -4,11 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { GraduationCap, Eye, EyeOff, Loader2 } from "lucide-react";
+import { GraduationCap, Eye, EyeOff, Loader2, Users, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/auth";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/cn";
+import type { UserRole } from "@/types";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -23,6 +24,7 @@ export default function SignUpPage() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("student");
 
   const {
     register,
@@ -35,14 +37,14 @@ export default function SignUpPage() {
     const { data: result, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
-      options: { data: { full_name: data.name } },
+      options: { data: { full_name: data.name, role: selectedRole } },
     });
     if (error) {
       setAuthError(error.message === "User already registered" ? "An account with this email already exists" : error.message);
       return;
     }
     if (result.user) {
-      login(result.user.email ?? data.email, data.name);
+      login(result.user.email ?? data.email, data.name, selectedRole);
       navigate("/", { replace: true });
     }
   };
@@ -96,7 +98,38 @@ export default function SignUpPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-4" noValidate>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setSelectedRole("student")}
+              className={cn(
+                "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
+                selectedRole === "student"
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50"
+              )}
+            >
+              <Users className="size-6" aria-hidden />
+              <span className="text-sm font-semibold">Student</span>
+              <span className="text-xs text-center">I want to learn English</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedRole("teacher")}
+              className={cn(
+                "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
+                selectedRole === "teacher"
+                  ? "border-primary bg-primary/5 text-primary"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50"
+              )}
+            >
+              <BookOpen className="size-6" aria-hidden />
+              <span className="text-sm font-semibold">Teacher</span>
+              <span className="text-xs text-center">I want to teach English</span>
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4" noValidate>
             <div>
               <label htmlFor="name" className="mb-1.5 block text-sm font-semibold">
                 Full name

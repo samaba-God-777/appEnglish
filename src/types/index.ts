@@ -8,11 +8,14 @@ export type SkillKey =
   | "grammar"
   | "vocabulary";
 
+export type UserRole = "student" | "teacher";
+
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   avatarInitials: string;
+  role: UserRole;
   level: CefrLevel;
   xp: number;
   xpToNextLevel: number;
@@ -25,6 +28,36 @@ export interface UserProfile {
   coursesCompleted: number;
   certificates: number;
   rank: number;
+}
+
+export interface TeacherClass {
+  id: string;
+  teacherId: string;
+  className: string;
+  classCode: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Enrollment {
+  id: string;
+  classId: string;
+  studentId: string;
+  joinedAt: string;
+}
+
+export interface StudentWithScores {
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  avatarInitials: string;
+  xp: number;
+  level: CefrLevel;
+  wordsLearned: number;
+  minutesStudied: number;
+  streakDays: number;
+  joinedAt: string;
 }
 
 export interface Course {

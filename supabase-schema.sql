@@ -287,6 +287,7 @@ CREATE TABLE IF NOT EXISTS classes (
   description TEXT,
   level TEXT DEFAULT 'B1',
   activities JSONB DEFAULT '[]',
+  course_ids JSONB DEFAULT '[]',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

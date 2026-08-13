@@ -38,6 +38,7 @@ export interface TeacherClass {
   description: string;
   level: string;
   activities: string[];
+  courseIds: string[];
   createdAt: string;
   updatedAt: string;
 }

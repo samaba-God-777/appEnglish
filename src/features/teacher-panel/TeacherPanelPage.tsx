@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
+import { courses } from "@/data/mock";
 import {
   createClass,
   fetchTeacherClasses,
@@ -40,6 +41,15 @@ const ACTIVITIES = [
   { id: "games", label: "Games", icon: Gamepad2, color: "text-amber-500", bg: "bg-amber-500/10" },
 ] as const;
 
+const LEVEL_COLORS: Record<string, string> = {
+  A1: "bg-green-500/10 text-green-600",
+  A2: "bg-blue-500/10 text-blue-600",
+  B1: "bg-amber-500/10 text-amber-600",
+  B2: "bg-orange-500/10 text-orange-600",
+  C1: "bg-purple-500/10 text-purple-600",
+  C2: "bg-red-500/10 text-red-600",
+};
+
 export default function TeacherPanelPage() {
   const [classes, setClasses] = useState<TeacherClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,6 +58,7 @@ export default function TeacherPanelPage() {
   const [classDescription, setClassDescription] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string>("B1");
   const [selectedActivities, setSelectedActivities] = useState<string[]>(["vocabulary", "grammar", "listening", "speaking", "reading", "writing"]);
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [expandedClass, setExpandedClass] = useState<string | null>(null);
   const [students, setStudents] = useState<Record<string, StudentWithScores[]>>({});
@@ -72,6 +83,19 @@ export default function TeacherPanelPage() {
     );
   }
 
+  function toggleCourse(courseId: string) {
+    setSelectedCourses((prev) =>
+      prev.includes(courseId)
+        ? prev.filter((c) => c !== courseId)
+        : [...prev, courseId]
+    );
+  }
+
+  function selectCoursesByLevel(level: string) {
+    const levelCourses = courses.filter((c) => c.level === level).map((c) => c.id);
+    setSelectedCourses(levelCourses);
+  }
+
   async function handleCreateClass(e: React.FormEvent) {
     e.preventDefault();
     if (!className.trim() || selectedActivities.length === 0) return;
@@ -80,7 +104,8 @@ export default function TeacherPanelPage() {
       className.trim(),
       classDescription.trim() || undefined,
       selectedLevel,
-      selectedActivities
+      selectedActivities,
+      selectedCourses
     );
     if (newClass) {
       setClasses((prev) => [newClass, ...prev]);
@@ -88,6 +113,7 @@ export default function TeacherPanelPage() {
       setClassDescription("");
       setSelectedLevel("B1");
       setSelectedActivities(["vocabulary", "grammar", "listening", "speaking", "reading", "writing"]);
+      setSelectedCourses([]);
     }
     setCreating(false);
   }
@@ -120,6 +146,10 @@ export default function TeacherPanelPage() {
 
   function getActivityById(id: string) {
     return ACTIVITIES.find((a) => a.id === id);
+  }
+
+  function getCourseById(id: string) {
+    return courses.find((c) => c.id === id);
   }
 
   return (
@@ -180,7 +210,10 @@ export default function TeacherPanelPage() {
                 <button
                   key={level}
                   type="button"
-                  onClick={() => setSelectedLevel(level)}
+                  onClick={() => {
+                    setSelectedLevel(level);
+                    selectCoursesByLevel(level);
+                  }}
                   className={cn(
                     "rounded-xl border-2 px-4 py-2 text-sm font-bold transition-all",
                     selectedLevel === level
@@ -229,6 +262,62 @@ export default function TeacherPanelPage() {
             </div>
           </div>
 
+          {/* Course Selector */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold">
+              Assign Courses
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                ({selectedCourses.length} selected)
+              </span>
+            </label>
+            <p className="mb-3 text-xs text-muted-foreground">
+              Select which courses students in this class can access. Selected by level: {selectedLevel}
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {courses.map((course) => {
+                const isSelected = selectedCourses.includes(course.id);
+                return (
+                  <button
+                    key={course.id}
+                    type="button"
+                    onClick={() => toggleCourse(course.id)}
+                    className={cn(
+                      "flex items-start gap-3 rounded-xl border-2 p-3 text-left transition-all",
+                      isSelected
+                        ? "border-primary bg-primary/5"
+                        : "border-border bg-background hover:border-primary/30"
+                    )}
+                  >
+                    <div className="mt-0.5">
+                      <div
+                        className={cn(
+                          "flex size-5 items-center justify-center rounded-md border-2 transition-all",
+                          isSelected
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-muted-foreground/30"
+                        )}
+                      >
+                        {isSelected && <Check className="size-3" />}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold truncate">{course.title}</span>
+                        <span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs font-bold", LEVEL_COLORS[course.level])}>
+                          {course.level}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground truncate">{course.description}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {course.units} units · {course.lessons} lessons · {course.durationHours}h
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <Button type="submit" disabled={creating || !className.trim() || selectedActivities.length === 0}>
             {creating && <Loader2 className="animate-spin" aria-hidden />}
             Create Class
@@ -264,7 +353,7 @@ export default function TeacherPanelPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="text-lg font-bold">{cls.className}</h3>
-                      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                      <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-bold", LEVEL_COLORS[cls.level || "B1"])}>
                         {cls.level || "B1"}
                       </span>
                     </div>
@@ -314,6 +403,31 @@ export default function TeacherPanelPage() {
                         </span>
                       );
                     })}
+                  </div>
+                )}
+
+                {/* Assigned Courses */}
+                {cls.courseIds && cls.courseIds.length > 0 && (
+                  <div className="mt-3">
+                    <p className="mb-1.5 text-xs font-semibold text-muted-foreground">Assigned Courses:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {cls.courseIds.map((courseId) => {
+                        const course = getCourseById(courseId);
+                        if (!course) return null;
+                        return (
+                          <span
+                            key={courseId}
+                            className={cn(
+                              "inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium",
+                              LEVEL_COLORS[course.level]
+                            )}
+                          >
+                            <BookOpen className="size-3" />
+                            {course.title}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>

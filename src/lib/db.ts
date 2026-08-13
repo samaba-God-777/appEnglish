@@ -372,13 +372,13 @@ function generateClassCode(): string {
   return code;
 }
 
-export async function createClass(className: string, description?: string, level?: string, activities?: string[]) {
+export async function createClass(className: string, description?: string, level?: string, activities?: string[], courseIds?: string[]) {
   const uid = await getUserId();
   if (!uid) return null;
   const classCode = generateClassCode();
   const { data, error } = await supabase
     .from("classes")
-    .insert({ teacher_id: uid, class_name: className, class_code: classCode, description, level: level || "B1", activities: activities || [] })
+    .insert({ teacher_id: uid, class_name: className, class_code: classCode, description, level: level || "B1", activities: activities || [], course_ids: courseIds || [] })
     .select()
     .single();
   if (error) return null;
@@ -390,6 +390,7 @@ export async function createClass(className: string, description?: string, level
     description: data.description,
     level: data.level,
     activities: data.activities,
+    courseIds: data.course_ids,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   } as TeacherClass;
@@ -412,6 +413,7 @@ export async function fetchTeacherClasses() {
     description: row.description,
     level: row.level,
     activities: row.activities,
+    courseIds: row.course_ids,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   })) as TeacherClass[];
@@ -436,6 +438,7 @@ export async function fetchClassByCode(code: string) {
     description: data.description,
     level: data.level,
     activities: data.activities,
+    courseIds: data.course_ids,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   } as TeacherClass;
@@ -479,6 +482,9 @@ export async function fetchStudentEnrollments() {
           className: row.classes.class_name,
           classCode: row.classes.class_code,
           description: row.classes.description,
+          level: row.classes.level,
+          activities: row.classes.activities,
+          courseIds: row.classes.course_ids,
           createdAt: row.classes.created_at,
           updatedAt: row.classes.updated_at,
         }
@@ -527,4 +533,23 @@ export async function removeStudentFromClass(classId: string, studentId: string)
     .delete()
     .eq("class_id", classId)
     .eq("student_id", studentId);
+}
+
+export async function fetchStudentAssignedCourseIds(): Promise<string[]> {
+  const uid = await getUserId();
+  if (!uid) return [];
+  const { data } = await supabase
+    .from("enrollments")
+    .select("classes(course_ids)")
+    .eq("student_id", uid);
+  if (!data) return [];
+  const allIds = new Set<string>();
+  for (const row of data) {
+    const classData = Array.isArray(row.classes) ? row.classes[0] : row.classes;
+    const ids = classData?.course_ids;
+    if (Array.isArray(ids)) {
+      ids.forEach((id: string) => allIds.add(id));
+    }
+  }
+  return Array.from(allIds);
 }

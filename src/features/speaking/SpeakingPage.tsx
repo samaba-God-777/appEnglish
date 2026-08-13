@@ -254,11 +254,11 @@ export default function SpeakingPage() {
             {levels.map((level) => (
               <Button
                 key={level}
-                variant={selectedLevel === level ? "default" : "outline"}
+                variant={selectedLevel === level ? "primary" : "outline"}
                 onClick={() => {
                   setSelectedLevel(level);
                   const levelExercises = getExercisesByLevel(level);
-                  if (levelExercises.length > 0) {
+                  if (levelExercises.length > 0 && levelExercises[0]) {
                     setSelectedExerciseId(levelExercises[0].id);
                   }
                   setRecordedAudio(null);
@@ -487,7 +487,6 @@ export default function SpeakingPage() {
             <CardContent className="space-y-6">
               {(assessment?.metrics ?? speakingMetrics).map((metric) => {
                 const isStrength = metric.score >= 80;
-                const isAverage = metric.score >= 70 && metric.score < 80;
                 const needsWork = metric.score < 70;
 
                 // Define performance levels

@@ -1,15 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
-import { ArrowLeft, BookOpen, Clock, Users, Volume2, Eye, EyeOff, Check, X, Mic } from "lucide-react";
+import { ArrowLeft, BookOpen, Clock, Users, Check, X, Mic } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { getArticleById } from "./reading-data";
 import { PronunciationFlow } from "./PronunciationFlow";
 import { cn } from "@/lib/cn";
-import type { ReadingArticle } from "./reading-data";
 
 type Phase = "reading" | "pronunciation" | "vocabulary" | "comprehension" | "results";
 
@@ -23,7 +21,6 @@ export default function ReadingDetailPage() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const [phase, setPhase] = useState<Phase>("reading");
-  const [readingTime, setReadingTime] = useState(0);
   const [answers, setAnswers] = useState<AnswerState>({});
   const [submitted, setSubmitted] = useState(false);
   const [highlightedWords, setHighlightedWords] = useState<string[]>([]);
@@ -302,7 +299,7 @@ export default function ReadingDetailPage() {
               <CardTitle>Review Your Answers</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {article.comprehensionQuestions.map((question, qIdx) => {
+              {article.comprehensionQuestions.map((question) => {
                 const isCorrect = answers[question.id] === question.correctAnswer;
                 return (
                   <div

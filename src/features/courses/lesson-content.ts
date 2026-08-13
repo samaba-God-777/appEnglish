@@ -72,6 +72,10 @@ const READINGS: Record<CefrLevel, string[]> = {
     "The rise of algorithmic curation reshapes how audiences encounter information. It maximises engagement, yet it risks generating echo chambers that narrow, rather than broaden, public discourse.",
     "Asymmetric information, where one party knows more than another, underpins many modern economic problems. Trust remains the fragile condition that lets markets work.",
   ],
+  C2: [
+    "The epistemological implications of quantum decoherence challenge classical determinism, suggesting that observation itself constitutes an irreducible variable in physical systems.",
+    "Post-structuralist hermeneutics posits that textual meaning is perpetually deferred, residing not in authorial intent but in the reader's interpretive horizon.",
+  ],
 };
 
 const LISTENING: Record<CefrLevel, Array<{ text: string; question: string }>> = {
@@ -94,6 +98,10 @@ const LISTENING: Record<CefrLevel, Array<{ text: string; question: string }>> = 
   C1: [
     { text: "The author argues that unilateral regulation can split an industry that already lacks coordination.", question: "What does the author claim about unilateral regulation?" },
     { text: "While the results look conclusive, some research caveats cast doubt on the link, so we need replication first.", question: "Why is the finding uncertain?" },
+  ],
+  C2: [
+    { text: "The philosopher contends that consciousness cannot be reduced to computational processes, as qualia resist formalisation within any extant framework.", question: "What is the philosopher's central claim about consciousness?" },
+    { text: "Despite the empirical rigor of the study, the authors acknowledge that confounding variables may attenuate the causal inference drawn from the data.", question: "Why do the authors temper their conclusions?" },
   ],
 };
 
@@ -128,6 +136,12 @@ const GAPFILLS: Record<CefrLevel, Array<{ prompt: string; key: string }>> = {
     { prompt: "The new policy is tantamount ___ a complete ban.", key: "to" },
     { prompt: "Not only ___ he meet the deadline, but he exceeded it.", key: "did" },
   ],
+  C2: [
+    { prompt: "The findings are ___ consistent with the prevailing theory.", key: "broadly" },
+    { prompt: "This phenomenon ___ a reassessment of established paradigms.", key: "necessitates" },
+    { prompt: "The policy, ___ well-intentioned, produced adverse effects.", key: "notwithstanding" },
+    { prompt: "Her argument was not ___ but rather exploratory.", key: "definitive" },
+  ],
 };
 
 const WRITING: Record<CefrLevel, Array<{ prompt: string; hint: string }>> = {
@@ -150,6 +164,10 @@ const WRITING: Record<CefrLevel, Array<{ prompt: string; hint: string }>> = {
   C1: [
     { prompt: "Write a concise paragraph on why limiting free data collection is necessary.", hint: "Use precise, abstract vocabulary and a clear logical link." },
     { prompt: "Summarise the main shortfall of current urban-sustainability approaches.", hint: "Balance ambition against feasibility in your wording." },
+  ],
+  C2: [
+    { prompt: "Write a critical analysis of the relationship between language and power in institutional discourse.", hint: "Employ nominalisation, hedging, and advanced cohesive devices." },
+    { prompt: "Compose an essay evaluating the ethical dimensions of autonomous decision-making systems.", hint: "Use abstract nouns, complex syntax, and nuanced qualification." },
   ],
 };
 
@@ -184,6 +202,12 @@ const SPEECH: Record<CefrLevel, string[]> = {
     "A nuanced reading of the evidence reveals that these factors interrelate.",
     "The ramifications of such a decision extend beyond the immediate case.",
   ],
+  C2: [
+    "The epistemological ramifications of quantum mechanics fundamentally challenge our preconceived notions of causality.",
+    "Notwithstanding the ostensible consonance in political ideology, underlying ideological fissures substantiate claims of systemic incongruence.",
+    "The amelioration of societal inequities necessitates a multidisciplinary approach synthesising insights from numerous academic disciplines.",
+    "The nuanced interplay between socioeconomic factors and cultural manifestations warrants comprehensive empirical investigation.",
+  ],
 };
 
 // Options used for listen/read main-idea steps so an answer is always selectable.
@@ -193,6 +217,7 @@ const MAIN_IDEA_OPTIONS: Record<CefrLevel, string[]> = {
   B1: ["The main idea in the text", "A side detail", "An unrelated topic", "The opposite claim"],
   B2: ["The central point of the text", "A supporting detail only", "An unrelated topic", "The opposite claim"],
   C1: ["The central argument of the text", "A peripheral detail", "An unrelated topic", "A contrary view"],
+  C2: ["The overarching thesis of the text", "A subsidiary observation", "An irrelevant claim", "A refutation of the thesis"],
 };
 
 function bankFor(level: CefrLevel) {

@@ -72,6 +72,24 @@ export const unitTopicsByLevel: Record<CefrLevel, readonly string[]> = {
     "Paraphrase & Summary",
     "Register Shifting",
   ],
+  C2: [
+    "Epistemic Modality",
+    "Pragmatic Inference",
+    "Semantic Nuance",
+    "Discourse Architecture",
+    "Rhetorical Strategy",
+    "Stylistic Register",
+    "Metalinguistic Commentary",
+    "Argumentation Theory",
+    "Critical Discourse Analysis",
+    "Intertextuality",
+    "Cognitive Metaphor",
+    "Pragmatic Presupposition",
+    "Information Structure",
+    "Prosodic Interpretation",
+    "Cross-Cultural Pragmatics",
+    "Academic Hedging",
+  ],
 };
 
 /** Level-appropriate exercises. Lessons pull from the bank matching their course level. */
@@ -115,5 +133,13 @@ export const questionBankByLevel: Record<CefrLevel, QuizQuestion[]> = {
     { id: "c1-4", question: "She spoke with such eloquence ___ the room fell silent.", options: ["that", "so", "which", "as"], answerIndex: 0, explanation: "'Such + noun + that' introduces a result clause." },
     { id: "c1-5", question: "The new policy is tantamount ___ a complete ban.", options: ["to", "with", "of", "for"], answerIndex: 0, explanation: "The collocation is 'tantamount to' (equivalent to)." },
     { id: "c1-6", question: "Not only ___ the deadline, but he also exceeded expectations.", options: ["he met", "did he meet", "he did meet", "met he"], answerIndex: 1, explanation: "'Not only' at the start of a clause forces subject-auxiliary inversion." },
+  ],
+  C2: [
+    { id: "c2-1", question: "The findings are ___ consistent with the prevailing theory.", options: ["broadly", "broad", "breadth", "broaden"], answerIndex: 0, explanation: "An adverb ('broadly') modifies the adjective 'consistent'." },
+    { id: "c2-2", question: "Had the evidence been ___, the verdict would have differed.", options: ["substantive", "substantially", "substantiate", "substantiated"], answerIndex: 3, explanation: "The past participle 'substantiated' fits the passive construction." },
+    { id: "c2-3", question: "The author's argument is not ___ but rather exploratory.", options: ["definitive", "definition", "definitely", "definitively"], answerIndex: 0, explanation: "An adjective ('definitive') is needed after 'is not'." },
+    { id: "c2-4", question: "She spoke with ___ that left no room for doubt.", options: ["authority", "authoritative", "authoritatively", "authorised"], answerIndex: 0, explanation: "A noun ('authority') follows the preposition 'with'." },
+    { id: "c2-5", question: "The policy, ___ well-intentioned, produced adverse effects.", options: ["however", "although", "being", "notwithstanding"], answerIndex: 3, explanation: "'Notwithstanding' + adjective means 'in spite of'." },
+    { id: "c2-6", question: "This phenomenon ___ a reassessment of established paradigms.", options: ["necessitates", "necessity", "necessarily", "necessitated"], answerIndex: 0, explanation: "A verb in the present simple ('necessitates') matches the subject." },
   ],
 };

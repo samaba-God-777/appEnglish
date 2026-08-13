@@ -380,21 +380,7 @@ const essentialWords: VocabularyWord[] = [
 export const vocabularyWords: VocabularyWord[] = [...essentialWords, ...generatedVocabularyWords];
 
 export const leaderboard: LeaderboardEntry[] = [
-  { rank: 1, name: "Sofia Chen", initials: "SC", xp: 28450, streak: 64, level: "C1", country: "🇸🇬" },
-  { rank: 2, name: "Miguel Torres", initials: "MT", xp: 26120, streak: 41, level: "B2", country: "🇲🇽" },
-  { rank: 3, name: "Amara Okafor", initials: "AO", xp: 24890, streak: 58, level: "B2", country: "🇳🇬" },
-  { rank: 4, name: "Lucas Silva", initials: "LS", xp: 22300, streak: 30, level: "B2", country: "🇧🇷" },
-  { rank: 5, name: "Yuki Tanaka", initials: "YT", xp: 21750, streak: 92, level: "C1", country: "🇯🇵" },
-  { rank: 6, name: "Elena Petrova", initials: "EP", xp: 19480, streak: 27, level: "B1", country: "🇧🇬" },
-  { rank: 7, name: "Ahmed Hassan", initials: "AH", xp: 18920, streak: 35, level: "B2", country: "🇪🇬" },
-  { rank: 8, name: "Marie Dubois", initials: "MD", xp: 17640, streak: 22, level: "B1", country: "🇫🇷" },
-  { rank: 9, name: "Jan Kowalski", initials: "JK", xp: 16280, streak: 19, level: "B1", country: "🇵🇱" },
-  { rank: 10, name: "Priya Sharma", initials: "PS", xp: 15830, streak: 44, level: "B2", country: "🇮🇳" },
-  { rank: 11, name: "Carlos Ruiz", initials: "CR", xp: 14970, streak: 16, level: "B1", country: "🇨🇴" },
-  { rank: 12, name: "Anna Schmidt", initials: "AS", xp: 13820, streak: 25, level: "B1", country: "🇩🇪" },
-  { rank: 13, name: "Liam O'Brien", initials: "LO", xp: 13100, streak: 12, level: "A2", country: "🇮🇪" },
-  { rank: 14, name: "Degracia Williams", initials: "DW", xp: 12480, streak: 23, level: "B1", country: "🇵🇦", isCurrentUser: true },
-  { rank: 15, name: "Nina Rossi", initials: "NR", xp: 11960, streak: 9, level: "A2", country: "🇮🇹" },
+  { rank: 1, name: "Degracia Williams", initials: "DW", xp: 12480, streak: 23, level: "B1", country: "🌎", isCurrentUser: true },
 ];
 
 export const achievements: Achievement[] = [

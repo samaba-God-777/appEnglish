@@ -116,7 +116,11 @@ export default function SettingsPage() {
     setPasswordLoading(false);
 
     if (error) {
-      setPasswordError(error.message);
+      if (error.message.includes("422") || error.message.includes("recent") || error.message.includes("session")) {
+        setPasswordError("Please log out and log back in, then try again.");
+      } else {
+        setPasswordError(error.message);
+      }
     } else {
       setPasswordSuccess("Password updated successfully!");
       setNewPassword("");

@@ -372,13 +372,13 @@ function generateClassCode(): string {
   return code;
 }
 
-export async function createClass(className: string, description?: string) {
+export async function createClass(className: string, description?: string, level?: string, activities?: string[]) {
   const uid = await getUserId();
   if (!uid) return null;
   const classCode = generateClassCode();
   const { data, error } = await supabase
     .from("classes")
-    .insert({ teacher_id: uid, class_name: className, class_code: classCode, description })
+    .insert({ teacher_id: uid, class_name: className, class_code: classCode, description, level: level || "B1", activities: activities || [] })
     .select()
     .single();
   if (error) return null;
@@ -388,6 +388,8 @@ export async function createClass(className: string, description?: string) {
     className: data.class_name,
     classCode: data.class_code,
     description: data.description,
+    level: data.level,
+    activities: data.activities,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   } as TeacherClass;
@@ -408,6 +410,8 @@ export async function fetchTeacherClasses() {
     className: row.class_name,
     classCode: row.class_code,
     description: row.description,
+    level: row.level,
+    activities: row.activities,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   })) as TeacherClass[];
@@ -430,6 +434,8 @@ export async function fetchClassByCode(code: string) {
     className: data.class_name,
     classCode: data.class_code,
     description: data.description,
+    level: data.level,
+    activities: data.activities,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   } as TeacherClass;

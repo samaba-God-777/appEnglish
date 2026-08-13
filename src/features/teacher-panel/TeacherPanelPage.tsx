@@ -11,8 +11,15 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
+  Headphones,
+  Mic,
+  Eye,
+  PenLine,
+  Gamepad2,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
 import {
   createClass,
   fetchTeacherClasses,
@@ -21,12 +28,26 @@ import {
 } from "@/lib/db";
 import type { TeacherClass, StudentWithScores } from "@/types";
 
+const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
+
+const ACTIVITIES = [
+  { id: "vocabulary", label: "Vocabulary", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
+  { id: "grammar", label: "Grammar", icon: MessageSquare, color: "text-purple-500", bg: "bg-purple-500/10" },
+  { id: "listening", label: "Listening", icon: Headphones, color: "text-green-500", bg: "bg-green-500/10" },
+  { id: "speaking", label: "Speaking", icon: Mic, color: "text-orange-500", bg: "bg-orange-500/10" },
+  { id: "reading", label: "Reading", icon: Eye, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+  { id: "writing", label: "Writing", icon: PenLine, color: "text-pink-500", bg: "bg-pink-500/10" },
+  { id: "games", label: "Games", icon: Gamepad2, color: "text-amber-500", bg: "bg-amber-500/10" },
+] as const;
+
 export default function TeacherPanelPage() {
   const [classes, setClasses] = useState<TeacherClass[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [className, setClassName] = useState("");
   const [classDescription, setClassDescription] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState<string>("B1");
+  const [selectedActivities, setSelectedActivities] = useState<string[]>(["vocabulary", "grammar", "listening", "speaking", "reading", "writing"]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [expandedClass, setExpandedClass] = useState<string | null>(null);
   const [students, setStudents] = useState<Record<string, StudentWithScores[]>>({});
@@ -43,15 +64,30 @@ export default function TeacherPanelPage() {
     setLoading(false);
   }
 
+  function toggleActivity(activityId: string) {
+    setSelectedActivities((prev) =>
+      prev.includes(activityId)
+        ? prev.filter((a) => a !== activityId)
+        : [...prev, activityId]
+    );
+  }
+
   async function handleCreateClass(e: React.FormEvent) {
     e.preventDefault();
-    if (!className.trim()) return;
+    if (!className.trim() || selectedActivities.length === 0) return;
     setCreating(true);
-    const newClass = await createClass(className.trim(), classDescription.trim() || undefined);
+    const newClass = await createClass(
+      className.trim(),
+      classDescription.trim() || undefined,
+      selectedLevel,
+      selectedActivities
+    );
     if (newClass) {
       setClasses((prev) => [newClass, ...prev]);
       setClassName("");
       setClassDescription("");
+      setSelectedLevel("B1");
+      setSelectedActivities(["vocabulary", "grammar", "listening", "speaking", "reading", "writing"]);
     }
     setCreating(false);
   }
@@ -82,6 +118,10 @@ export default function TeacherPanelPage() {
     }
   }
 
+  function getActivityById(id: string) {
+    return ACTIVITIES.find((a) => a.id === id);
+  }
+
   return (
     <div className="mx-auto max-w-4xl space-y-8 p-6">
       <div>
@@ -101,35 +141,95 @@ export default function TeacherPanelPage() {
           <Plus className="size-5 text-primary" />
           Create New Class
         </h2>
-        <form onSubmit={handleCreateClass} className="mt-4 space-y-3">
-          <div>
-            <label htmlFor="className" className="mb-1.5 block text-sm font-semibold">
-              Class Name
-            </label>
-            <input
-              id="className"
-              type="text"
-              value={className}
-              onChange={(e) => setClassName(e.target.value)}
-              placeholder="e.g. English B1 - Monday"
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:border-ring"
-              required
-            />
+        <form onSubmit={handleCreateClass} className="mt-4 space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="className" className="mb-1.5 block text-sm font-semibold">
+                Class Name
+              </label>
+              <input
+                id="className"
+                type="text"
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
+                placeholder="e.g. English B1 - Monday"
+                className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:border-ring"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="classDesc" className="mb-1.5 block text-sm font-semibold">
+                Description (optional)
+              </label>
+              <input
+                id="classDesc"
+                type="text"
+                value={classDescription}
+                onChange={(e) => setClassDescription(e.target.value)}
+                placeholder="e.g. Intermediate group"
+                className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:border-ring"
+              />
+            </div>
           </div>
+
+          {/* Level Selector */}
           <div>
-            <label htmlFor="classDesc" className="mb-1.5 block text-sm font-semibold">
-              Description (optional)
-            </label>
-            <input
-              id="classDesc"
-              type="text"
-              value={classDescription}
-              onChange={(e) => setClassDescription(e.target.value)}
-              placeholder="e.g. Intermediate group, Mondays and Wednesdays"
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm placeholder:text-muted-foreground focus:border-ring"
-            />
+            <label className="mb-2 block text-sm font-semibold">Level</label>
+            <div className="flex flex-wrap gap-2">
+              {LEVELS.map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setSelectedLevel(level)}
+                  className={cn(
+                    "rounded-xl border-2 px-4 py-2 text-sm font-bold transition-all",
+                    selectedLevel === level
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-muted-foreground hover:border-primary/50"
+                  )}
+                >
+                  {level}
+                </button>
+              ))}
+            </div>
           </div>
-          <Button type="submit" disabled={creating || !className.trim()}>
+
+          {/* Activity Selector */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold">
+              Activities
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                ({selectedActivities.length} selected)
+              </span>
+            </label>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {ACTIVITIES.map((activity) => {
+                const isSelected = selectedActivities.includes(activity.id);
+                const Icon = activity.icon;
+                return (
+                  <button
+                    key={activity.id}
+                    type="button"
+                    onClick={() => toggleActivity(activity.id)}
+                    className={cn(
+                      "flex items-center gap-2.5 rounded-xl border-2 px-3 py-2.5 text-left text-sm font-medium transition-all",
+                      isSelected
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-border bg-background text-muted-foreground hover:border-primary/30"
+                    )}
+                  >
+                    <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-lg", activity.bg)}>
+                      <Icon className={cn("size-4", activity.color)} />
+                    </div>
+                    <span>{activity.label}</span>
+                    {isSelected && <Check className="ml-auto size-4 text-primary" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <Button type="submit" disabled={creating || !className.trim() || selectedActivities.length === 0}>
             {creating && <Loader2 className="animate-spin" aria-hidden />}
             Create Class
           </Button>
@@ -159,16 +259,21 @@ export default function TeacherPanelPage() {
               className="rounded-2xl border border-border bg-card overflow-hidden"
             >
               {/* Class Header */}
-              <div className="flex items-center justify-between p-5">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold">{cls.className}</h3>
-                  {cls.description && (
-                    <p className="mt-0.5 text-sm text-muted-foreground">{cls.description}</p>
-                  )}
-                </div>
+              <div className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold">{cls.className}</h3>
+                      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+                        {cls.level || "B1"}
+                      </span>
+                    </div>
+                    {cls.description && (
+                      <p className="mt-0.5 text-sm text-muted-foreground">{cls.description}</p>
+                    )}
+                  </div>
 
-                {/* Class Code */}
-                <div className="flex items-center gap-2">
+                  {/* Class Code */}
                   <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-4 py-2">
                     <span className="text-xs font-medium text-muted-foreground">Code:</span>
                     <span className="font-mono text-lg font-extrabold tracking-widest text-primary">
@@ -188,6 +293,29 @@ export default function TeacherPanelPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Activities Tags */}
+                {cls.activities && cls.activities.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {cls.activities.map((actId) => {
+                      const act = getActivityById(actId);
+                      if (!act) return null;
+                      const Icon = act.icon;
+                      return (
+                        <span
+                          key={actId}
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium",
+                            act.bg, act.color
+                          )}
+                        >
+                          <Icon className="size-3" />
+                          {act.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Expand/Collapse Students */}

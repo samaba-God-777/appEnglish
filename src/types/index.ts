@@ -36,6 +36,8 @@ export interface TeacherClass {
   className: string;
   classCode: string;
   description: string;
+  level: string;
+  activities: string[];
   createdAt: string;
   updatedAt: string;
 }

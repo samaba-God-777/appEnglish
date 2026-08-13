@@ -5,7 +5,6 @@ import { useSidebarStore } from "@/store/sidebar";
 import { useUser } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "./topbar/GlobalSearch";
-import { NotificationsMenu } from "./topbar/NotificationsMenu";
 import { ProfileMenu } from "./topbar/ProfileMenu";
 
 export function Topbar() {
@@ -42,8 +41,6 @@ export function Topbar() {
             {user.diamonds}
           </span>
         </Link>
-
-        <NotificationsMenu />
 
         <Button
           variant="ghost"

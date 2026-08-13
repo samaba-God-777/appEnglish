@@ -28,35 +28,6 @@ function initialsFrom(name: string): string {
     .join("");
 }
 
-function Toggle({ label, description, defaultOn = true }: { label: string; description: string; defaultOn?: boolean }) {
-  const [on, setOn] = useState(defaultOn);
-  return (
-    <div className="flex items-center justify-between gap-4 py-3">
-      <div>
-        <p className="text-sm font-semibold">{label}</p>
-        <p className="text-xs text-muted-foreground">{description}</p>
-      </div>
-      <button
-        role="switch"
-        aria-checked={on}
-        aria-label={label}
-        onClick={() => setOn((v) => !v)}
-        className={cn(
-          "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200",
-          on ? "bg-primary" : "bg-muted",
-        )}
-      >
-        <span
-          className={cn(
-            "absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow transition-transform duration-200",
-            on && "translate-x-5",
-          )}
-        />
-      </button>
-    </div>
-  );
-}
-
 export default function SettingsPage() {
   const { theme, setTheme } = useThemeStore();
   const user = useUser();
@@ -202,17 +173,6 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Notifications</CardTitle>
-          </CardHeader>
-          <CardContent className="divide-y divide-border">
-            <Toggle label="Daily reminder" description="A nudge to keep your streak alive, every day at 7 PM." />
-            <Toggle label="Streak alerts" description="Warn me before my streak is about to break." />
-            <Toggle label="Weekly report" description="Summary of XP, minutes and words learned, every Monday." defaultOn={false} />
-            <Toggle label="Leaderboard changes" description="Tell me when someone passes me in my league." defaultOn={false} />
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

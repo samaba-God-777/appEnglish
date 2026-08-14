@@ -154,6 +154,46 @@ const Q: GrammarQuestion[] = [
   { id: "mod4", topicId: "modal-verbs", kind: "gapfill", prompt: "He must ___ left his keys at home. (past deduction)", options: ["have", "had", "has", "to have"], correctIndex: 0, explanation: "Past deduction: modal + have + past participle." },
   { id: "mod5", topicId: "modal-verbs", kind: "mcq", prompt: "Choose the correct sentence.", options: ["May I come in?", "May I to come in?", "I may come in?", "May I coming in?"], correctIndex: 0, explanation: "Permission/request: May + subject + base verb." },
   { id: "mod6", topicId: "modal-verbs", kind: "mcq", prompt: "Which word is NOT a modal?", options: ["swim", "should", "may", "must"], correctIndex: 0, explanation: "'Swim' is an ordinary verb; should/may/must are all modals." },
+
+  // ─────────────────────────── ARTICLES ───────────────────────────
+  { id: "art1", topicId: "articles", kind: "gapfill", prompt: "I saw ___ dog in the park.", options: ["a", "an", "the", "no article"], correctIndex: 0, explanation: "First mention, non-specific → indefinite article 'a'." },
+  { id: "art2", topicId: "articles", kind: "gapfill", prompt: "Can you close ___ door?", options: ["the", "a", "an", "no article"], correctIndex: 0, explanation: "Specific door (we both know which one) → 'the'." },
+  { id: "art3", topicId: "articles", kind: "gapfill", prompt: "She is ___ engineer.", options: ["an", "a", "the", "no article"], correctIndex: 0, explanation: "Before vowel sound → 'an'." },
+  { id: "art4", topicId: "articles", kind: "mcq", prompt: "Which is correct?", options: ["The sun is bright.", "A sun is bright.", "Sun is bright.", "An sun is bright."], correctIndex: 0, explanation: "Unique things (sun, moon) use 'the'." },
+  { id: "art5", topicId: "articles", kind: "mcq", prompt: "Choose the correct sentence.", options: ["I like music.", "I like the music.", "I like a music.", "I like an music."], correctIndex: 0, explanation: "General/uncountable nouns (music) need no article." },
+  { id: "art6", topicId: "articles", kind: "gapfill", prompt: "She is ___ best student in the class.", options: ["the", "a", "an", "no article"], correctIndex: 0, explanation: "Superlatives always use 'the'." },
+
+  // ─────────────────── COUNTABLE / UNCOUNTABLE ───────────────────
+  { id: "cu1", topicId: "countable-uncountable", kind: "gapfill", prompt: "How ___ students are in the class?", options: ["many", "much", "a lot", "some"], correctIndex: 0, explanation: "'Students' is countable → use 'many'." },
+  { id: "cu2", topicId: "countable-uncountable", kind: "gapfill", prompt: "There isn't ___ milk left.", options: ["much", "many", "a few", "few"], correctIndex: 0, explanation: "'Milk' is uncountable → use 'much'." },
+  { id: "cu3", topicId: "countable-uncountable", kind: "gapfill", prompt: "I have ___ friends in London.", options: ["a few", "a little", "much", "little"], correctIndex: 0, explanation: "'Friends' is countable → use 'a few'." },
+  { id: "cu4", topicId: "countable-uncountable", kind: "mcq", prompt: "Which word is UNCOUNTABLE?", options: ["information", "books", "chairs", "students"], correctIndex: 0, explanation: "'Information' is uncountable — it has no plural." },
+  { id: "cu5", topicId: "countable-uncountable", kind: "gapfill", prompt: "How ___ money do you need?", options: ["much", "many", "few", "a few"], correctIndex: 0, explanation: "'Money' is uncountable → use 'much'." },
+  { id: "cu6", topicId: "countable-uncountable", kind: "mcq", prompt: "Choose the correct sentence.", options: ["She gave me some good advice.", "She gave me some good advices.", "She gave me a good advice.", "She gave me many advice."], correctIndex: 0, explanation: "'Advice' is uncountable → use 'some advice'." },
+
+  // ─────────────── COMPARATIVES & SUPERLATIVES ───────────────
+  { id: "cs1", topicId: "comparatives-superlatives", kind: "gapfill", prompt: "She is ___ than her brother.", options: ["taller", "more tall", "tallest", "most tall"], correctIndex: 0, explanation: "Short adjective (1 syllable): tall → taller." },
+  { id: "cs2", topicId: "comparatives-superlatives", kind: "gapfill", prompt: "This book is ___ interesting than that one.", options: ["more", "most", "very", "much more"], correctIndex: 0, explanation: "Long adjective (3 syllables): use 'more + adj'." },
+  { id: "cs3", topicId: "comparatives-superlatives", kind: "gapfill", prompt: "She is ___ student in the class.", options: ["the most intelligent", "the more intelligent", "most intelligent", "intelligentest"], correctIndex: 0, explanation: "Superlative with long adjective: the most + adj." },
+  { id: "cs4", topicId: "comparatives-superlatives", kind: "mcq", prompt: "What is the superlative of 'good'?", options: ["best", "goodest", "most good", "better"], correctIndex: 0, explanation: "Irregular: good → better → best." },
+  { id: "cs5", topicId: "comparatives-superlatives", kind: "gapfill", prompt: "This coffee is ___ than mine.", options: ["hotter", "more hot", "hottest", "more hotter"], correctIndex: 0, explanation: "Short adjective: hot → hotter." },
+  { id: "cs6", topicId: "comparatives-superlatives", kind: "mcq", prompt: "Choose the correct sentence.", options: ["She is as tall as her mother.", "She is as tall than her mother.", "She is more tall as her mother.", "She is taller as her mother."], correctIndex: 0, explanation: "Equal comparison: as + adj + as." },
+
+  // ─────────────── GERUNDS & INFINITIVES ───────────────
+  { id: "gi1", topicId: "gerunds-infinitives", kind: "gapfill", prompt: "I enjoy ___ books.", options: ["reading", "to read", "read", "reads"], correctIndex: 0, explanation: "'Enjoy' is followed by the gerund (-ing)." },
+  { id: "gi2", topicId: "gerunds-infinitives", kind: "gapfill", prompt: "She wants ___ become a doctor.", options: ["to", "ing", "for", "at"], correctIndex: 0, explanation: "'Want' is followed by the infinitive (to + verb)." },
+  { id: "gi3", topicId: "gerunds-infinitives", kind: "gapfill", prompt: "He finished ___ the report.", options: ["writing", "to write", "write", "wrote"], correctIndex: 0, explanation: "'Finish' is followed by the gerund (-ing)." },
+  { id: "gi4", topicId: "gerunds-infinitives", kind: "mcq", prompt: "Which is correct?", options: ["I stopped smoking.", "I stopped to smoke.", "Both are correct with different meanings."], correctIndex: 2, explanation: "'Stop + -ing' = quit. 'Stop + to-infinitive' = pause to do something." },
+  { id: "gi5", topicId: "gerunds-infinitives", kind: "gapfill", prompt: "She's good ___ cooking Italian food.", options: ["at", "to", "for", "on"], correctIndex: 0, explanation: "After prepositions, always use the gerund: good at cooking." },
+  { id: "gi6", topicId: "gerunds-infinitives", kind: "mcq", prompt: "Choose the correct sentence.", options: ["Remember to lock the door.", "Remember locking the door."], correctIndex: 0, explanation: "'Remember to + verb' = don't forget. 'Remember + -ing' = recall a past action." },
+
+  // ─────────────── RELATIVE CLAUSES ───────────────
+  { id: "rc1", topicId: "relative-clauses", kind: "gapfill", prompt: "The man ___ lives next door is a doctor.", options: ["who", "which", "where", "whose"], correctIndex: 0, explanation: "'Who' is used for people." },
+  { id: "rc2", topicId: "relative-clauses", kind: "gapfill", prompt: "The book ___ I read was great.", options: ["which", "who", "where", "whose"], correctIndex: 0, explanation: "'Which' is used for things." },
+  { id: "rc3", topicId: "relative-clauses", kind: "gapfill", prompt: "The restaurant ___ we ate was expensive.", options: ["where", "who", "which", "whose"], correctIndex: 0, explanation: "'Where' is used for places." },
+  { id: "rc4", topicId: "relative-clauses", kind: "gapfill", prompt: "The girl ___ father is a teacher is in my class.", options: ["whose", "who", "which", "where"], correctIndex: 0, explanation: "'Whose' shows possession." },
+  { id: "rc5", topicId: "relative-clauses", kind: "mcq", prompt: "Which can replace 'who' in informal English?", options: ["that", "which", "where", "whose"], correctIndex: 0, explanation: "'That' can replace 'who' for people in defining clauses." },
+  { id: "rc6", topicId: "relative-clauses", kind: "mcq", prompt: "Choose the correct sentence.", options: ["The woman who called me is my aunt.", "The woman which called me is my aunt.", "The woman where called me is my aunt.", "The woman whose called me is my aunt."], correctIndex: 0, explanation: "'Who' is used for people." },
 ];
 
 const BANK: Record<string, GrammarQuestion[]> = Object.create(null);

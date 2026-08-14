@@ -18,6 +18,26 @@ const Q: GrammarQuestion[] = [
   { id: "ps4", topicId: "present-simple", kind: "mcq", prompt: "Which is the correct sentence for a timetable?", options: ["The train leaves at 6 p.m.", "The train leave at 6 p.m.", "The train left at 6 p.m.", "The train has left at 6 p.m."], correctIndex: 0, explanation: "Timetables (fixed future) use the Present Simple: leaves." },
   { id: "ps5", topicId: "present-simple", kind: "mcq", prompt: "Which verb is NOT normally used in the continuous?", options: ["run", "know", "play", "watch"], correctIndex: 1, explanation: "'Know' is a stative verb — it stays in the Present Simple." },
   { id: "ps6", topicId: "present-simple", kind: "mcq", prompt: "Choose the correct sentence.", options: ["I don't like this song.", "I doesn't like this song.", "I not like this song.", "I am not like this song."], correctIndex: 0, explanation: "Negative with 'I' uses don't + base verb." },
+  { id: "ps7", topicId: "present-simple", kind: "gapfill", prompt: "He ___ breakfast at 7 a.m. every day.", options: ["eats", "eat", "is eating", "eating"], correctIndex: 0, explanation: "Third person singular: eat → eats." },
+  { id: "ps8", topicId: "present-simple", kind: "gapfill", prompt: "___ she speak French?", options: ["Does", "Do", "Is", "Has"], correctIndex: 0, explanation: "Questions with 'she' use 'does': Does she speak…?" },
+  { id: "ps9", topicId: "present-simple", kind: "gapfill", prompt: "They ___ TV every evening.", options: ["watch", "watches", "are watching", "watching"], correctIndex: 0, explanation: "Plural subject (they) uses the base form: watch." },
+  { id: "ps10", topicId: "present-simple", kind: "mcq", prompt: "Which is correct?", options: ["My mother works at a bank.", "My mother work at a bank.", "My mother is work at a bank.", "My mother working at a bank."], correctIndex: 0, explanation: "Third person singular: work → works." },
+  { id: "ps11", topicId: "present-simple", kind: "gapfill", prompt: "I ___ not like spicy food.", options: ["do", "does", "am", "have"], correctIndex: 0, explanation: "Negative with 'I' uses 'do not'." },
+  { id: "ps12", topicId: "present-simple", kind: "mcq", prompt: "Choose the correct question form.", options: ["Do you like chocolate?", "Does you like chocolate?", "Are you like chocolate?", "Do you likes chocolate?"], correctIndex: 0, explanation: "Questions with 'you' use 'do': Do you like…?" },
+  { id: "ps13", topicId: "present-simple", kind: "gapfill", prompt: "The sun ___ in the east.", options: ["rises", "rise", "is rising", "rose"], correctIndex: 0, explanation: "General truth: the sun rises." },
+  { id: "ps14", topicId: "present-simple", kind: "gapfill", prompt: "We ___ to the gym on Mondays.", options: ["go", "goes", "are going", "going"], correctIndex: 0, explanation: "Plural subject (we) uses base form: go." },
+  { id: "ps15", topicId: "present-simple", kind: "mcq", prompt: "Which sentence is correct?", options: ["She doesn't have a car.", "She doesn't has a car.", "She don't have a car.", "She not have a car."], correctIndex: 0, explanation: "Negative with 'she' uses 'doesn't' + base form." },
+  { id: "ps16", topicId: "present-simple", kind: "gapfill", prompt: "My father ___ the newspaper every morning.", options: ["reads", "read", "is reading", "reading"], correctIndex: 0, explanation: "Third person singular: read → reads." },
+  { id: "ps17", topicId: "present-simple", kind: "mcq", prompt: "Which is a stative verb?", options: ["believe", "run", "jump", "swim"], correctIndex: 0, explanation: "'Believe' is stative — it describes a state, not an action." },
+  { id: "ps18", topicId: "present-simple", kind: "gapfill", prompt: "___ it rain a lot in your country?", options: ["Does", "Do", "Is", "Has"], correctIndex: 0, explanation: "Questions with 'it' use 'does': Does it rain…?" },
+  { id: "ps19", topicId: "present-simple", kind: "gapfill", prompt: "The children ___ in the garden.", options: ["play", "plays", "are playing", "played"], correctIndex: 0, explanation: "Plural subject (children) uses base form: play." },
+  { id: "ps20", topicId: "present-simple", kind: "mcq", prompt: "Choose the correct sentence.", options: ["He studies English every day.", "He study English every day.", "He is study English every day.", "He studys English every day."], correctIndex: 0, explanation: "Third person singular: study → studies (consonant + y → ies)." },
+  { id: "ps21", topicId: "present-simple", kind: "gapfill", prompt: "I ___ coffee but I ___ tea.", options: ["like … don't like", "likes … doesn't like", "am liking … not liking", "liked … didn't like"], correctIndex: 0, explanation: "'I' uses 'like' and 'don't like' (base form)." },
+  { id: "ps22", topicId: "present-simple", kind: "mcq", prompt: "Which is correct?", options: ["The bus arrives at 9 a.m.", "The bus arrive at 9 a.m.", "The bus is arrive at 9 a.m.", "The bus arriving at 9 a.m."], correctIndex: 0, explanation: "Timetables use Present Simple: arrives (third person)." },
+  { id: "ps23", topicId: "present-simple", kind: "gapfill", prompt: "My sister ___ her homework after school.", options: ["does", "do", "is doing", "did"], correctIndex: 0, explanation: "Third person singular: do → does." },
+  { id: "ps24", topicId: "present-simple", kind: "gapfill", prompt: "He ___ like cold weather.", options: ["doesn't", "don't", "isn't", "hasn't"], correctIndex: 0, explanation: "Negative with 'he' uses 'doesn't' + base form." },
+  { id: "ps25", topicId: "present-simple", kind: "mcq", prompt: "Choose the correct sentence.", options: ["Fish live in water.", "Fish lives in water.", "Fish are living in water.", "Fish is live in water."], correctIndex: 0, explanation: "General truths use Present Simple. Fish (plural) → live." },
+  { id: "ps26", topicId: "present-simple", kind: "gapfill", prompt: "___ he work in an office?", options: ["Does", "Do", "Is", "Has"], correctIndex: 0, explanation: "Questions with 'he' use 'does': Does he work…?" },
 
   // ───────────────────────── PRESENT CONTINUOUS ─────────────────────────
   { id: "pc1", topicId: "present-continuous", kind: "gapfill", prompt: "She ___ reading a book right now.", options: ["is", "are", "am", "be"], correctIndex: 0, explanation: "Present Continuous for an action right now: She is reading." },
@@ -201,7 +221,7 @@ for (const q of Q) {
   (BANK[q.topicId] ??= []).push(q);
 }
 
-const MODE_COUNT: Record<GrammarMode, number> = { activity: 5, test: 6, assignment: 6 };
+const MODE_COUNT: Record<GrammarMode, number> = { activity: 5, test: 10, assignment: 10 };
 
 /** Deterministic question set for a topic and mode. */
 export function buildQuiz(topicId: string, mode: GrammarMode): GrammarQuestion[] {

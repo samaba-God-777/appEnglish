@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY as string;
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
+const API_BASE = "/api/grammar";
 
 interface AssistantTopic {
   title: string;
@@ -54,43 +52,15 @@ export function GrammarAssistant({ topic }: { topic: AssistantTopic }) {
     setMessages(history);
     setBusy(true);
 
-    const systemPrompt = `You are an expert ESL grammar tutor for Spanish-speaking learners, now helping with the topic "${topic.title}" (target level ${topic.level}).
-Rules:
-- Explain rules clearly in simple English, with one short example sentence each.
-- Use bold **like this** for the key grammar structure / any term worth remembering.
-- Reference the topic's signal words: ${topic.signalWords.join(", ")}, to help recognition.
-- If the learner asks in Spanish ("explica en español"), switch to clear Spanish.
-- If the learner pastes a sentence, correct it and explain the grammar point, not just the words.
-- Keep answers focused: typically 2-5 short paragraphs or a short bulleted list. No long essays.`;
-
     try {
-      const res = await fetch(GROQ_URL, {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          temperature: 0.7,
-          max_tokens: 1200,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...history.map((m) => ({ role: m.role, content: m.content })),
-          ],
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic, messages: history }),
       });
-
-      if (!res.ok) {
-        const detail = await res.text();
-        throw new Error(`Groq API error (${res.status}): ${detail.slice(0, 100)}`);
-      }
-
-      const data = (await res.json()) as { choices: { message: { content: string } }[] };
-      const reply = data.choices?.[0]?.message?.content;
-      if (!reply) throw new Error("Empty reply from AI");
-
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      if (!res.ok) throw new Error(`Server error (${res.status})`);
+      const data = (await res.json()) as { reply: string };
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not reach the AI tutor");
     } finally {

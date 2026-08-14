@@ -6,25 +6,7 @@ import { grammarTopics } from "./grammar-content";
 import { buildQuiz, type GrammarQuestion } from "./grammar-questions";
 import { GrammarQuiz } from "./GrammarQuiz";
 
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY as string;
-const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
 const FALLBACK_COUNT = 5;
-
-function isQuestion(value: unknown): value is GrammarQuestion {
-  if (!value || typeof value !== "object") return false;
-  const v = value as Record<string, unknown>;
-  return (
-    typeof v.prompt === "string" &&
-    Array.isArray(v.options) &&
-    v.options.length === 4 &&
-    typeof v.correctIndex === "number" &&
-    v.correctIndex >= 0 &&
-    v.correctIndex < 4 &&
-    (v.kind === "mcq" || v.kind === "gapfill") &&
-    typeof v.explanation === "string"
-  );
-}
 
 export default function GrammarAiQuizPage() {
   const { topicId } = useParams<{ topicId: string }>();
@@ -36,63 +18,16 @@ export default function GrammarAiQuizPage() {
   const load = async () => {
     if (!topic) return;
     setState("loading");
-
-    const prompt = `Create ${FALLBACK_COUNT} English language-learning quiz questions for the grammar topic "${topic.title}".
-Return ONLY JSON with this exact shape:
-{"questions":[{"id":"q1","topicId":"${topic.id}","kind":"mcq","prompt":"...","options":["a","b","c","d"],"correctIndex":0,"explanation":"..."}]}
-- id must be unique per question.
-- kind: "mcq" or "gapfill". For gapfill, the prompt's blank MUST be written with "___" (e.g. "She ___ to work every morning.") and options must fit the blank.
-- exactly 4 options per question.
-- correctIndex is the 0-based index of the right option.
-- explanation is one short sentence explaining the rule, in simple English.
-- Focus on choosing the correct tense/structure/form for the topic. Make one or two distractors common learner mistakes.
-- Do not include markdown or extra keys.`;
-
     try {
-      const res = await fetch(GROQ_URL, {
+      const res = await fetch("/api/grammar/generate", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: MODEL,
-          temperature: 0.7,
-          max_tokens: 1200,
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: prompt },
-          ],
-        }),
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ topicId: topic.id, topicTitle: topic.title, count: FALLBACK_COUNT }),
       });
-
-      if (!res.ok) {
-        const detail = await res.text();
-        throw new Error(`Groq API error (${res.status}): ${detail.slice(0, 100)}`);
-      }
-
-      const data = (await res.json()) as { choices: { message: { content: string } }[] };
-      const content = data.choices?.[0]?.message?.content;
-      if (!content) throw new Error("Empty response from AI");
-
-      const parsed = JSON.parse(content) as { questions?: unknown[] };
-      const validQuestions = (parsed.questions ?? [])
-        .filter(isQuestion)
-        .slice(0, FALLBACK_COUNT)
-        .map((q, i) => {
-          const prompt = (q as GrammarQuestion).prompt.replace(/_{2,}/g, "___");
-          return {
-            ...(q as GrammarQuestion),
-            prompt,
-            id: `${topic.id}-ai-${i + 1}`,
-            topicId: topic.id,
-            kind: prompt.includes("___") ? "gapfill" as const : "mcq" as const,
-          };
-        });
-
-      if (validQuestions.length === 0) throw new Error("No valid questions generated");
-
-      setQuestions(validQuestions);
+      if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const data = (await res.json()) as { questions?: GrammarQuestion[] };
+      if (!data.questions || data.questions.length === 0) throw new Error("No questions generated");
+      setQuestions(data.questions);
       setState("ready");
     } catch {
       setState("error");

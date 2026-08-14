@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY as string;
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL = "llama-3.3-70b-versatile";
+
 interface AssistantTopic {
   title: string;
   level: string;
@@ -15,7 +19,6 @@ interface Msg {
   content: string;
 }
 
-/** Renders **bold** markers as <strong>. */
 function renderContent(content: string) {
   return content.split("\n").map((line, i) => (
     <p key={i} className={cn("min-h-[1em] whitespace-pre-wrap", i > 0 && "mt-1")}>
@@ -50,21 +53,46 @@ export function GrammarAssistant({ topic }: { topic: AssistantTopic }) {
     const history: Msg[] = [...messages, { role: "user", content: trimmed }];
     setMessages(history);
     setBusy(true);
+
+    const systemPrompt = `You are an expert ESL grammar tutor for Spanish-speaking learners, now helping with the topic "${topic.title}" (target level ${topic.level}).
+Rules:
+- Explain rules clearly in simple English, with one short example sentence each.
+- Use bold **like this** for the key grammar structure / any term worth remembering.
+- Reference the topic's signal words: ${topic.signalWords.join(", ")}, to help recognition.
+- If the learner asks in Spanish ("explica en español"), switch to clear Spanish.
+- If the learner pastes a sentence, correct it and explain the grammar point, not just the words.
+- Keep answers focused: typically 2-5 short paragraphs or a short bulleted list. No long essays.`;
+
     try {
-      const res = await fetch("/api/grammar/chat", {
+      const res = await fetch(GROQ_URL, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "Authorization": `Bearer ${GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          topic: { title: topic.title, level: topic.level, signalWords: topic.signalWords },
-          messages: history.map((m) => ({ role: m.role, content: m.content })),
+          model: MODEL,
+          temperature: 0.7,
+          max_tokens: 1200,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...history.map((m) => ({ role: m.role, content: m.content })),
+          ],
         }),
       });
-      if (!res.ok) throw new Error(`Request failed (${res.status})`);
-      const data = (await res.json()) as { reply?: string };
-      if (!data.reply) throw new Error("Empty reply");
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply! }]);
+
+      if (!res.ok) {
+        const detail = await res.text();
+        throw new Error(`Groq API error (${res.status}): ${detail.slice(0, 100)}`);
+      }
+
+      const data = (await res.json()) as { choices: { message: { content: string } }[] };
+      const reply = data.choices?.[0]?.message?.content;
+      if (!reply) throw new Error("Empty reply from AI");
+
+      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not reach the tutor");
+      setError(e instanceof Error ? e.message : "Could not reach the AI tutor");
     } finally {
       setBusy(false);
     }
@@ -94,7 +122,7 @@ export function GrammarAssistant({ topic }: { topic: AssistantTopic }) {
                   <Bot className="size-4" aria-hidden />
                 </div>
                 <div className="rounded-2xl rounded-tl-sm bg-muted px-4 py-3 text-sm leading-relaxed text-muted-foreground">
-                  I&apos;m your grammar tutor for {topic.title}. Try: “Explain this to me in Spanish” or paste a sentence.
+                  I&apos;m your grammar tutor for {topic.title}. Try: "Explain this to me in Spanish" or paste a sentence.
                 </div>
               </div>
             )}
